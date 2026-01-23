@@ -1,0 +1,65 @@
+.difficulty-selector {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #c0c0c0;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.difficulty-buttons button {
+  padding: 5px 15px;
+  border: 2px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  background-color: #c0c0c0;
+  cursor: pointer;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+}
+
+.difficulty-buttons button:hover {
+  background-color: #d4d4d4;
+}
+
+.difficulty-buttons button.active {
+  background-color: #d4d4d4;
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.difficulty-buttons button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.custom-config {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.custom-config label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+}
+
+.custom-config input {
+  width: 60px;
+  padding: 2px 5px;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  background-color: #ffffff;
+  font-family: 'Courier New', monospace;
+}
+
+.custom-config input:focus {
+  outline: none;
+  border-color: #000080;
+}

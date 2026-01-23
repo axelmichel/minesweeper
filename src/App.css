@@ -1,0 +1,54 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'MS Sans Serif', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #c0c0c0;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #c0c0c0;
+}
+
+h1 {
+  color: #000080;
+  font-family: 'MS Sans Serif', sans-serif;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 0px #ffffff;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game-message {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: 2px solid;
+  border-color: #808080 #ffffff #ffffff #808080;
+  background-color: #c0c0c0;
+  font-family: 'MS Sans Serif', sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.game-message.won {
+  color: #008000;
+}
+
+.game-message.lost {
+  color: #ff0000;
+}
