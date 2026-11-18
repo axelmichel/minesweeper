@@ -1,0 +1,47 @@
+.hotbar {
+  display: flex;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 3px solid #1a1a1a;
+  box-shadow: inset 0 0 0 3px #6b6b6b;
+}
+
+.hotbar-slot {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  margin: 3px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(139, 139, 139, 0.35);
+  border: 0;
+  box-shadow:
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+
+.hotbar-slot.selected {
+  outline: 4px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 2px #000000,
+    inset 0 0 0 2px #000000;
+}
+
+.hotbar-slot:focus-visible {
+  outline: 4px solid #ffff55;
+}
+
+.hotbar-sprite {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.45));
+}
+
+.hotbar-key {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+}

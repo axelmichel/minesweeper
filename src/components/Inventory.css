@@ -1,0 +1,34 @@
+.inventory {
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  background: #c6c6c6;
+  border: 3px solid #000000;
+  box-shadow:
+    inset 3px 3px 0 #ffffff,
+    inset -3px -3px 0 #555555;
+}
+
+.inventory-slot {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+}
+
+.inventory-sprite {
+  width: 24px;
+  height: 24px;
+}
+
+.inventory-slot.empty .inventory-sprite {
+  opacity: 0.25;
+  filter: grayscale(1);
+}
+
+.inventory-count {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+}

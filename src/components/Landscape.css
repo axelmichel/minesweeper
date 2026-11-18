@@ -1,0 +1,112 @@
+/* The meadow around the field: board coordinates, in cells; ground level is the top of the
+   field's grass blocks (--h above the board). */
+.landscape,
+.landscape .strip,
+.landscape .tree {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.ground,
+.ground-edge,
+.path,
+.pond,
+.plant,
+.lbox {
+  position: absolute;
+  left: calc(var(--x) * var(--cell));
+  top: calc(var(--y) * var(--cell));
+  width: calc(var(--w, 1) * var(--cell));
+  height: calc(var(--d, 1) * var(--cell));
+}
+
+/* Grass, tiled block by block, out past the edges of the screen. */
+.ground {
+  transform: translateZ(var(--h));
+  background: var(--tex-grass-0) 0 0 / var(--cell) var(--cell);
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 99999px rgba(255, 255, 255, 0.04);
+}
+
+/* The wall where the meadow meets the field, seen down a pit at the field's edge. */
+.ground-edge {
+  transform: translateZ(var(--h));
+  transform-style: preserve-3d;
+}
+
+.ground-edge .wall {
+  --side: var(--tex-dirt-0);
+  background-repeat: repeat-x;
+}
+
+.ground-edge .wall.east,
+.ground-edge .wall.west {
+  width: calc(var(--d) * var(--cell));
+}
+
+.path {
+  transform: translateZ(calc(var(--h) + 0.5px));
+  background: var(--tex-path) 0 0 / var(--cell) var(--cell);
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 1px rgba(60, 40, 20, 0.35);
+}
+
+.pond {
+  transform: translateZ(calc(var(--h) + 1px));
+  background: var(--tex-water) 0 0 / var(--cell) var(--cell);
+  image-rendering: pixelated;
+  box-shadow:
+    inset 0 0 0 2px rgba(20, 40, 90, 0.35),
+    inset 0 0 calc(var(--cell) * 0.4) rgba(255, 255, 255, 0.15);
+  animation: ripple 3s linear infinite;
+}
+
+@keyframes ripple {
+  to {
+    background-position: var(--cell) calc(var(--cell) * 0.5);
+  }
+}
+
+/* A block of any size (tree trunks and crowns): a textured top at --z cells above ground, its
+   sides hanging --bh cells down. */
+.lbox {
+  transform: translateZ(calc(var(--h) + var(--z) * var(--cell)));
+  transform-style: preserve-3d;
+  background: var(--top) 0 0 / var(--cell) var(--cell);
+  image-rendering: pixelated;
+}
+
+.lbox .face {
+  --h: calc(var(--bh) * var(--cell));
+  --side: var(--box-side);
+  background-repeat: repeat;
+}
+
+.lbox .face.east,
+.lbox .face.west {
+  width: calc(var(--d) * var(--cell));
+}
+
+/* Flowers and tall grass stand up in the meadow, facing the viewer. */
+.plant {
+  transform: translateZ(var(--h));
+  transform-style: preserve-3d;
+}
+
+.plant-sprite {
+  position: absolute;
+  left: 20%;
+  bottom: 50%;
+  width: 60%;
+  height: 60%;
+  transform-origin: 50% 100%;
+  transform: var(--bb);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pond {
+    animation: none;
+  }
+}

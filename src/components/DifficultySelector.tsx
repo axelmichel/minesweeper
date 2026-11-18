@@ -1,4 +1,5 @@
 import { Difficulty, GameConfig } from '../types';
+import { PixelText } from '../pixel/PixelText';
 import './DifficultySelector.css';
 
 interface DifficultySelectorProps {
@@ -7,6 +8,13 @@ interface DifficultySelectorProps {
   onDifficultyChange: (difficulty: Difficulty) => void;
   onCustomConfigChange: (config: GameConfig) => void;
 }
+
+const LEVELS: { id: Difficulty; label: string }[] = [
+  { id: 'beginner', label: 'Easy' },
+  { id: 'intermediate', label: 'Normal' },
+  { id: 'expert', label: 'Hard' },
+  { id: 'custom', label: 'Custom' },
+];
 
 export function DifficultySelector({
   currentDifficulty,
@@ -24,37 +32,24 @@ export function DifficultySelector({
   return (
     <div className="difficulty-selector">
       <div className="difficulty-buttons">
-        <button
-          className={currentDifficulty === 'beginner' ? 'active' : ''}
-          onClick={() => onDifficultyChange('beginner')}
-        >
-          Beginner
-        </button>
-        <button
-          className={currentDifficulty === 'intermediate' ? 'active' : ''}
-          onClick={() => onDifficultyChange('intermediate')}
-        >
-          Intermediate
-        </button>
-        <button
-          className={currentDifficulty === 'expert' ? 'active' : ''}
-          onClick={() => onDifficultyChange('expert')}
-        >
-          Expert
-        </button>
-        <button
-          className={currentDifficulty === 'custom' ? 'active' : ''}
-          onClick={() => onDifficultyChange('custom')}
-        >
-          Custom
-        </button>
+        {LEVELS.map(({ id, label }) => (
+          <button
+            key={id}
+            className={`mc-button ${currentDifficulty === id ? 'active' : ''}`}
+            aria-pressed={currentDifficulty === id}
+            onClick={() => onDifficultyChange(id)}
+          >
+            <PixelText text={label} color={currentDifficulty === id ? '#ffff55' : '#ffffff'} scale={2} />
+          </button>
+        ))}
       </div>
-      
+
       {currentDifficulty === 'custom' && (
         <div className="custom-config">
           <label>
-            Rows:
+            <PixelText text="Rows" color="#404040" shadow={false} scale={2} />
             <input
+              className="mc-input"
               type="number"
               min="5"
               max="30"
@@ -63,8 +58,9 @@ export function DifficultySelector({
             />
           </label>
           <label>
-            Columns:
+            <PixelText text="Columns" color="#404040" shadow={false} scale={2} />
             <input
+              className="mc-input"
               type="number"
               min="5"
               max="50"
@@ -73,8 +69,9 @@ export function DifficultySelector({
             />
           </label>
           <label>
-            Bombs:
+            <PixelText text="TNT" color="#404040" shadow={false} scale={2} />
             <input
+              className="mc-input"
               type="number"
               min="1"
               max={customConfig.rows * customConfig.cols - 1}

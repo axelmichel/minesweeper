@@ -1,3 +1,6 @@
+import { PixelText } from '../pixel/PixelText';
+import { Sprite } from '../pixel/Sprite';
+import { CLOCK, CREEPER, CREEPER_BLOWN, DIAMOND } from '../pixel/sprites';
 import './GameHeader.css';
 
 interface GameHeaderProps {
@@ -16,19 +19,21 @@ export function GameHeader({ bombsRemaining, gameStatus, elapsedTime, onNewGame 
     return Math.max(0, Math.min(999, bombs)).toString().padStart(3, '0');
   };
 
-  const getFaceEmoji = (): string => {
-    if (gameStatus === 'won') return '😎';
-    if (gameStatus === 'lost') return '😵';
-    return '🙂';
-  };
+  const face = gameStatus === 'won' ? DIAMOND : gameStatus === 'lost' ? CREEPER_BLOWN : CREEPER;
 
   return (
     <div className="game-header">
-      <div className="counter bombs-counter">{formatBombs(bombsRemaining)}</div>
-      <button className="face-button" onClick={onNewGame}>
-        {getFaceEmoji()}
+      <div className="slot counter" title="TNT left">
+        <span className="tnt-icon" aria-hidden="true" />
+        <PixelText text={formatBombs(bombsRemaining)} mono scale={3} />
+      </div>
+      <button className={`mc-button face-button ${gameStatus}`} onClick={onNewGame} aria-label="New game" title="New game">
+        <Sprite sprite={face} className="face-sprite" />
       </button>
-      <div className="counter time-counter">{formatTime(elapsedTime)}</div>
+      <div className="slot counter" title="Time">
+        <Sprite sprite={CLOCK} scale={2} />
+        <PixelText text={formatTime(elapsedTime)} mono scale={3} />
+      </div>
     </div>
   );
 }

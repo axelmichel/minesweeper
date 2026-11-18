@@ -1,0 +1,47 @@
+.compass {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compass-turn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+.compass-dial {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(#9a9a9a, #6f6f6f);
+  /* Turned, the square rose inside would poke out of the circle (and out of the window). */
+  overflow: hidden;
+}
+
+/* The dial turns as the board does: north points where the board's north is on screen. */
+.compass-rose {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--turn));
+}
+
+.compass-needle {
+  position: absolute;
+  left: calc(50% - 2px);
+  top: 30%;
+  width: 4px;
+  height: 40%;
+  background: linear-gradient(#e0402e 50%, #f0f0f0 50%);
+  box-shadow: 0 0 0 1px #1a1a1a;
+}
+
+.compass-point {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Out to the rim at its angle, then turned back upright. */
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-13px)
+    rotate(calc((var(--angle) + var(--turn)) * -1));
+}

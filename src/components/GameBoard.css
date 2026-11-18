@@ -1,9 +1,81 @@
+.board-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px;
+}
+
+.board-frame {
+  /* Upright again inside the turned board: flags, ores, numbers and fragments face the viewer. */
+  --bb: rotate(0deg);
+  --h: 0px;
+}
+
+/* Flat: cells shrink on narrow screens, between 20 and 36 pixels. */
+.board-frame.view-flat {
+  --cell: min(36px, max(20px, calc((100vw - 72px) / var(--cols))));
+  display: inline-block;
+}
+
+/* Isometric: the board turned and tilted to the 2:1 pixel-art angle, nearly orthographic. The frame is
+   the size the board takes at its widest angle (its diagonal across, half that tall), plus the
+   blocks above and the island of earth below, so it fits however far it is turned. */
+.board-frame.view-3d {
+  --cell: min(36px, max(18px, calc((100vw - 72px) / (var(--diag)))));
+  --h: calc(var(--cell) * 0.55);
+  --bb: rotateZ(calc(var(--turn) * -1)) rotateX(-60deg);
+  position: relative;
+  /* A gentle perspective, from about three and a half board-widths away: strictly isometric, the far
+     side looks bigger than the near one in a landscape (the eye expects it smaller). */
+  perspective: calc(var(--diag) * var(--cell) * 3.5);
+  width: calc(var(--diag) * var(--cell) + 8px);
+  height: calc(var(--cell) * (var(--diag) * 0.5 + 1.6) + 8px);
+}
+
 .game-board {
   display: inline-block;
-  border: 3px solid;
-  border-color: #808080 #ffffff #ffffff #808080;
-  background-color: #c0c0c0;
-  padding: 2px;
+  background: #373737;
+  box-shadow:
+    inset 3px 3px 0 #1f1f1f,
+    inset -3px -3px 0 #ffffff;
+  padding: 3px;
+  line-height: 0;
+  position: relative;
+  /* When the TNT you hit blows: keep in step with FUSE in utils/explosion.ts. */
+  --blast: 0.5s;
+}
+
+/* No `filter` on the cells from here on: it would flatten their blocks. */
+.view-3d .game-board {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  padding: 0;
+  background: #4a3424;
+  box-shadow: none;
+  transform: translate(-50%, calc(-50% + var(--cell) * (0.48 - var(--diag) * 0.032))) rotateX(60deg) rotateZ(var(--turn));
+  transform-style: preserve-3d;
+}
+
+.view-3d .board-row,
+.view-3d .cell {
+  transform-style: preserve-3d;
+}
+
+/* Dug cells a pixel above the board: in the same plane, clicks could land on the board instead. */
+.view-3d .cell {
+  transform: translateZ(1px);
+}
+
+.view-3d .cell.raised {
+  transform: translateZ(var(--h));
+}
+
+.game-board.tool-dig {
+  cursor: var(--cursor-dig), crosshair;
+}
+
+.game-board.tool-flag {
+  cursor: var(--cursor-flag), pointer;
 }
 
 .board-row {
@@ -11,69 +83,505 @@
 }
 
 .cell {
-  width: 24px;
-  height: 24px;
-  border: 2px solid;
-  border-color: #ffffff #808080 #808080 #ffffff;
-  background-color: #c0c0c0;
-  font-size: 14px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  /* Lighter or darker on hover and press, without `filter`. */
+  --tint: transparent;
+  position: relative;
+  width: var(--cell);
+  height: var(--cell);
+  border: 0;
   padding: 0;
   margin: 0;
-  font-family: 'Courier New', monospace;
+  display: grid;
+  place-items: center;
+  background: var(--tex-grass-0) center / 100% 100%;
+  image-rendering: pixelated;
+  box-shadow:
+    inset 0 0 0 100px var(--tint),
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.38);
+  cursor: inherit;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.cell:hover:not(:disabled) {
-  background-color: #d4d4d4;
+.cell.v1 {
+  background-image: var(--tex-grass-1);
 }
 
-.cell:active:not(:disabled) {
-  border-color: #808080 #ffffff #ffffff #808080;
+.cell.v2 {
+  background-image: var(--tex-grass-2);
 }
 
+.cell.hidden:not(.rock):hover,
+.cell.flagged:hover {
+  --tint: rgba(255, 255, 255, 0.16);
+}
+
+.cell.hidden:not(.rock):active,
+.cell.flagged:active {
+  --tint: rgba(0, 0, 0, 0.12);
+}
+
+.cell:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* Dug: a dirt pit, shaded rather than filtered, so the numbers keep their colour. */
 .cell.revealed {
-  border: 1px solid #808080;
-  background-color: #c0c0c0;
-  border-color: #808080;
-}
-
-.cell.revealed:disabled {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), var(--tex-dirt-0);
+  box-shadow:
+    inset 3px 3px 0 rgba(0, 0, 0, 0.5),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.08);
   cursor: default;
+  animation: dig 0.18s ease-out;
 }
 
-.cell.number-1 {
-  color: #0000ff;
+.view-3d .cell.revealed {
+  animation-name: sink;
 }
 
-.cell.number-2 {
-  color: #008000;
+.cell.revealed.v1 {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), var(--tex-dirt-1);
 }
 
-.cell.number-3 {
-  color: #ff0000;
+.cell.revealed.v2 {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), var(--tex-dirt-2);
 }
 
-.cell.number-4 {
-  color: #000080;
+/* A number you can chord on: click it to dig the neighbours that aren't flagged. */
+.cell.revealed[aria-disabled='false'] {
+  cursor: pointer;
 }
 
-.cell.number-5 {
-  color: #800000;
+.cell.revealed.bomb {
+  background-image: var(--tex-tnt-top);
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.35);
 }
 
-.cell.number-6 {
-  color: #008080;
+.view-flat .cell.revealed.bomb {
+  background-image: var(--tex-tnt);
 }
 
-.cell.number-7 {
-  color: #000000;
+/* Rock: cobblestone standing proud of the grass, never dug. */
+.cell.rock {
+  background-image: var(--tex-rock);
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.5);
+  cursor: not-allowed;
 }
 
-.cell.number-8 {
-  color: #808080;
+/* The sides of a block, hanging from the edges of its top down to the ground, the grass fringe
+   along the top. Shaded by where they face on screen as the board turns: lit when facing left, in
+   shade when facing right, as Minecraft lights its blocks. Worked out here from --turn, so turning
+   needs no re-render: a side's screen direction is its outward normal turned by --turn. */
+.face {
+  --side: var(--tex-grass-side);
+  position: absolute;
+  pointer-events: none;
+  background: var(--side) top / var(--cell) var(--cell) no-repeat;
+  image-rendering: pixelated;
+  box-shadow: inset 0 0 0 999px var(--shade);
+}
+
+.face.north {
+  --shade: rgba(0, 0, 0, calc(0.3 + 0.12 * sin(var(--turn))));
+}
+
+.face.south {
+  --shade: rgba(0, 0, 0, calc(0.3 - 0.12 * sin(var(--turn))));
+}
+
+.face.east {
+  --shade: rgba(0, 0, 0, calc(0.3 + 0.12 * cos(var(--turn))));
+}
+
+.face.west {
+  --shade: rgba(0, 0, 0, calc(0.3 - 0.12 * cos(var(--turn))));
+}
+
+.face.north,
+.face.south {
+  left: 0;
+  width: 100%;
+  height: var(--h);
+  transform-origin: top;
+  transform: rotateX(-90deg);
+}
+
+.face.north {
+  top: 0;
+}
+
+.face.south {
+  top: 100%;
+}
+
+.face.east,
+.face.west {
+  top: 0;
+  width: var(--cell);
+  height: var(--h);
+  transform-origin: top left;
+  transform: rotateZ(90deg) rotateX(-90deg);
+}
+
+.face.east {
+  left: 100%;
+}
+
+.face.west {
+  left: 0;
+}
+
+.bomb .face {
+  --side: var(--tex-tnt);
+}
+
+.rock .face {
+  --side: var(--tex-rock);
+}
+
+/* The TNT you hit: it flashes white, like primed TNT, then glows. */
+.cell.exploded {
+  z-index: 2;
+  box-shadow: 0 0 18px 6px rgba(255, 170, 0, 0.8);
+}
+
+.cell.exploded::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  opacity: 0;
+  animation: blink 0.1s steps(1) 5;
+}
+
+/* The rest of the TNT goes off in turn: grass until its moment, then a flash. */
+.cell.chain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tex-grass-0) center / 100% 100%;
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.22),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.38);
+  visibility: hidden;
+  animation: hold-visible var(--delay) steps(1);
+}
+
+.cell.chain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: #ffffff;
+  opacity: 0;
+  animation: flash 0.35s ease-out var(--delay);
+}
+
+.chain .face {
+  animation: grass-sides var(--delay) steps(1);
+}
+
+/* The crater around the blast, scorched dirt over whatever was there; its blocks stand until the
+   blast, then they're gone. */
+.cell.crater::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.65)),
+    var(--tex-dirt-1) center / 100% 100%;
+  box-shadow: inset 3px 3px 0 rgba(0, 0, 0, 0.6);
+  animation: hold-hidden var(--blast) steps(1);
+}
+
+.view-3d .cell.crater-block {
+  animation: hold-raised var(--blast) steps(1);
+}
+
+.cell.crater > svg {
+  visibility: hidden;
+}
+
+.particles {
+  position: absolute;
+  inset: 3px;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Isometric: the fragments arc up out of the board and fall back, facing the viewer. */
+.view-3d .particles {
+  inset: 0;
+  overflow: visible;
+  transform: translateZ(var(--h));
+  transform-style: preserve-3d;
+}
+
+.view-3d .particle {
+  animation-name: fly-3d;
+}
+
+.particle {
+  position: absolute;
+  left: calc(var(--cell) * var(--x));
+  top: calc(var(--cell) * var(--y));
+  width: calc(var(--cell) * 0.2);
+  height: calc(var(--cell) * 0.2);
+  opacity: 0;
+  animation: fly 1s cubic-bezier(0.15, 0.6, 0.35, 1) var(--delay) forwards;
+}
+
+/* Ore in a dug cell: in the middle, or in the corner next to a number. */
+.cell-ore {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 56%;
+  height: 56%;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.6));
+  animation: pickup 0.35s ease-out;
+}
+
+.cell-ore.corner {
+  inset: auto 4% 4% auto;
+  width: 34%;
+  height: 34%;
+}
+
+.cell-number {
+  width: calc(var(--cell) * 0.4);
+  height: calc(var(--cell) * 0.6);
+}
+
+/* Isometric: numbers float above their pit like name tags, so the blocks in front never hide
+   them; ore lies in the pit, upright. */
+.view-3d .cell-number {
+  width: calc(var(--cell) * 0.36);
+  height: calc(var(--cell) * 0.56);
+  transform: translateZ(calc(var(--h) + var(--cell) * 0.08)) var(--bb);
+}
+
+.view-3d .cell-ore {
+  transform: translateZ(calc(var(--cell) * 0.2)) var(--bb);
+  animation-name: pickup-3d;
+}
+
+.cell-flag {
+  width: 70%;
+  height: 70%;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.5));
+  transform: var(--bb);
+  animation: plant 0.15s ease-out;
+}
+
+/* Isometric: the flag stands in the middle of the block's top, upright. */
+.view-3d .cell-flag {
+  position: absolute;
+  left: 15%;
+  bottom: 50%;
+  transform-origin: 50% 100%;
+}
+
+
+@keyframes dig {
+  from {
+    transform: scale(0.75);
+  }
+}
+
+@keyframes sink {
+  from {
+    transform: translateZ(calc(var(--h) * 0.7));
+  }
+  to {
+    transform: translateZ(1px);
+  }
+}
+
+@keyframes blink {
+  0% {
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes flash {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes grass-sides {
+  from,
+  to {
+    --side: var(--tex-grass-side);
+  }
+}
+
+@keyframes hold-raised {
+  from,
+  to {
+    transform: translateZ(var(--h));
+  }
+}
+
+@keyframes hold-visible {
+  from,
+  to {
+    visibility: visible;
+  }
+}
+
+@keyframes hold-hidden {
+  from,
+  to {
+    visibility: hidden;
+  }
+}
+
+@keyframes fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(
+      calc(-50% + var(--cell) * var(--dx) * 0.6),
+      calc(-50% + var(--cell) * var(--dy) * 0.6)
+    );
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--cell) * var(--dx)), calc(-50% + var(--cell) * (var(--dy) + 1.5)))
+      rotate(var(--rot)) scale(0.6);
+  }
+}
+
+@keyframes pickup {
+  0% {
+    transform: translateY(30%) scale(0.3);
+  }
+  60% {
+    transform: translateY(-15%) scale(1.15);
+  }
+}
+
+@keyframes plant {
+  from {
+    transform: var(--bb) translateY(-30%) scale(1.2);
+  }
+}
+
+@keyframes pickup-3d {
+  0% {
+    transform: translateZ(0) var(--bb) scale(0.3);
+  }
+  60% {
+    transform: translateZ(calc(var(--cell) * 0.5)) var(--bb) scale(1.15);
+  }
+}
+
+@keyframes fly-3d {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) var(--bb);
+  }
+  45% {
+    opacity: 1;
+    transform: translate3d(
+        calc(-50% + var(--cell) * var(--dx) * 0.6),
+        calc(-50% + var(--cell) * var(--dy) * 0.6),
+        calc(var(--cell) * 2.2)
+      )
+      var(--bb) rotate(var(--rot));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + var(--cell) * var(--dx)), calc(-50% + var(--cell) * var(--dy)), 0)
+      var(--bb) rotate(var(--rot)) scale(0.6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell,
+  .cell::before,
+  .cell::after,
+  .face,
+  .cell-flag,
+  .cell-ore {
+    animation: none !important;
+  }
+
+  .particles {
+    display: none;
+  }
+}
+
+/* Wide: the island floats in the window above the menu, as big as fits (times --zoom); the fragments may fly
+   past it. It must also clear the HUD (top left) and the info column (top right), about 330px
+   wide and 300px tall at most. */
+@media (min-width: 800px) {
+  /* Placed by its middle on the middle of the screen, then moved (panned) by --pan-x and --pan-y
+     when zoomed in. Not grid-centred: once bigger than the window, a grid item snaps to the
+     top left. */
+  .board-scroll {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max-content;
+    max-width: none;
+    overflow: visible;
+    transform: translate(calc(-50% + var(--pan-x, 0px)), calc(-50% + var(--pan-y, 0px)));
+  }
+
+  /* Flat: within the window, and either narrow enough to fit between the corners or short enough
+     to sit below them. */
+  .board-frame.view-flat {
+    --cell: calc(
+      var(--zoom, 1) *
+        min(
+      40px,
+      max(
+        18px,
+        min(
+          calc((100vw - 80px) / var(--cols)),
+          calc((100dvh - 220px) / var(--rows)),
+          max(calc((100vw - 660px) / var(--cols)), calc((100dvh - 560px) / var(--rows)))
+        )
+      ))
+    );
+  }
+
+  /* Isometric: within the window, and clear of the corner boxes at any angle. Turning, the board's
+     corners sweep a circle of half its diagonal, an ellipse on screen (twice as wide as tall); the
+     third term keeps the boxes' inner corners (330px in, 300px down, with room for the blocks)
+     outside it. */
+  .board-frame.view-3d {
+    --cell: calc(
+      var(--zoom, 1) *
+        min(
+      48px,
+      max(
+        14px,
+        min(
+          calc((100vw - 80px) / (var(--diag))),
+          calc((100dvh - 180px) / (var(--diag) * 0.5 + 1.6)),
+          calc(2 * hypot(50vw - 330px, 2 * (50dvh - 300px)) / var(--diag))
+        )
+      ))
+    );
+  }
 }
