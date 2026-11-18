@@ -8,6 +8,8 @@ type Side = 'north' | 'east' | 'south' | 'west';
 // The meadow the field lies in: how many cells it reaches past the field on every side (well past
 // the edges of the screen, at any turn), and how far out from the field's middle the scenery goes.
 const MARGIN = 48;
+// How wide the beach is, in cells, along the edge of the meadow.
+const SHORE = 2;
 const SCENERY = 22;
 const SIDES: Side[] = ['north', 'east', 'south', 'west'];
 
@@ -157,6 +159,23 @@ export const Landscape = memo(function Landscape({ rows, cols }: LandscapeProps)
           </div>
         </div>
       ))}
+      {/* The meadow is an island: a ring of sand along its edge, and its bank down to the sea. */}
+      {[
+        { x: -MARGIN, y: -MARGIN, w: cols + 2 * MARGIN, d: SHORE },
+        { x: -MARGIN, y: rows + MARGIN - SHORE, w: cols + 2 * MARGIN, d: SHORE },
+        { x: -MARGIN, y: -MARGIN + SHORE, w: SHORE, d: rows + 2 * MARGIN - 2 * SHORE },
+        { x: cols + MARGIN - SHORE, y: -MARGIN + SHORE, w: SHORE, d: rows + 2 * MARGIN - 2 * SHORE },
+      ].map((r, i) => (
+        <div key={i} className="shore" style={{ '--x': r.x, '--y': r.y, '--w': r.w, '--d': r.d } as React.CSSProperties} />
+      ))}
+      <div
+        className="ground-edge bank"
+        style={{ '--x': -MARGIN, '--y': -MARGIN, '--w': cols + 2 * MARGIN, '--d': rows + 2 * MARGIN } as React.CSSProperties}
+      >
+        {SIDES.map((side) => (
+          <span key={side} className={`face ${side} wall`} />
+        ))}
+      </div>
       {/* A path round the field, so its edge shows. */}
       {[
         { x: -1, y: -1, w: cols + 2, d: 1 },

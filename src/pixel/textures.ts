@@ -142,6 +142,7 @@ export function installTextures() {
   css.setProperty('--tex-log', url(draw(16, 16, logSide(), 61)));
   css.setProperty('--tex-leaves', url(draw(16, 16, leaves(), 62)));
   css.setProperty('--tex-water', url(draw(16, 16, water(), 63)));
+  css.setProperty('--tex-sand', url(draw(16, 16, noise(['#dbcf8e', '#e3d79b', '#d2c47f', '#e8dea8', '#cbbd78']), 65)));
   css.setProperty('--tex-tnt', url(draw(16, 16, tnt(), 31)));
   css.setProperty('--tex-tnt-top', url(draw(16, 16, tntTop(), 32)));
   css.setProperty('--tex-grass-side', url(draw(16, 16, grassSide(), 14)));

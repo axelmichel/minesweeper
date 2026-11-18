@@ -36,10 +36,23 @@ body {
   padding: 16px 12px 88px;
   /* Blast fragments may fly past the edge of the window; they mustn't make it scroll. */
   overflow-x: clip;
-  /* The floor: grass seen from above, all over; the isometric meadow covers it. */
-  background: #5b9a32 var(--tex-grass-0) 0 0 / 48px 48px;
+  /* The sea the meadow is an island in: it shows past the island's shore when zoomed far out. */
+  background: #3d6fd6 var(--tex-water) 0 0 / 48px 48px;
   image-rendering: pixelated;
   transition: --turn 0.3s ease-out;
+  animation: sea 6s linear infinite;
+}
+
+@keyframes sea {
+  to {
+    background-position: 48px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app {
+    animation: none;
+  }
 }
 
 /* While dragging, the island follows the pointer directly. */
@@ -57,6 +70,7 @@ body {
 /* Flat board: earth all round it, so the grass of the cells still to dig stands out. */
 .app.flat {
   background: #866043 var(--tex-dirt-0) 0 0 / 48px 48px;
+  animation: none;
 }
 
 .hud {

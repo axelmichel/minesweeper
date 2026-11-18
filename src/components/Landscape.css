@@ -12,6 +12,7 @@
 .ground,
 .ground-edge,
 .path,
+.shore,
 .pond,
 .plant,
 .lbox {
@@ -51,6 +52,17 @@
   background: var(--tex-path) 0 0 / var(--cell) var(--cell);
   image-rendering: pixelated;
   box-shadow: inset 0 0 0 1px rgba(60, 40, 20, 0.35);
+}
+
+/* The beach along the edge of the island, and its bank down to the sea. */
+.shore {
+  transform: translateZ(calc(var(--h) + 0.5px));
+  background: var(--tex-sand) 0 0 / var(--cell) var(--cell);
+  image-rendering: pixelated;
+}
+
+.ground-edge.bank .wall {
+  --side: var(--tex-sand);
 }
 
 .pond {
